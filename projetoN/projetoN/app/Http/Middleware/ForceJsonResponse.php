@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+
+class ForceJsonResponse
+{
+    public function handle($request, Closure $next)
+    {
+        $response = $next($request);
+
+        $response->header('Content-Type', 'application/json');
+
+        return $response;
+    }
+}
