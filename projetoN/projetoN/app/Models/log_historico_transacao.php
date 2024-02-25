@@ -10,7 +10,7 @@ class log_historico_transacao extends Model
 {
     use HasFactory;
 
-    protected $table = 'log_historico_transacoes';
+    protected $table = 'log_historico_transacao';
 
 
     protected $fillable = [
@@ -26,9 +26,21 @@ class log_historico_transacao extends Model
      * @param array $dados
      * @return bool
      */
-    public static function cadastrarLogTransacao($dados)
+    public static function criarTransacao($dados)
     {
-        return self::create($dados);
+        $query = DB::raw("
+        INSERT INTO log_historico_transacao (devedor_id, credor_id, tipo_transacao, valor, status)
+        VALUES (?,?,?,?,?)
+        ");
+        $valores = [
+            $dados['devedor_id'],
+            $dados['credor_id'],
+            $dados['tipo_transacao'],
+            $dados['valor'],
+            $dados['status']
+        ];
+
+        return DB::insert($query, $valores);
     }
 
     /**
@@ -58,7 +70,7 @@ class log_historico_transacao extends Model
     public static function buscarTransacao($id)
     {
         return DB::raw("SELECT *
-        FROM log_historico_transacoes
+        FROM log_historico_transacao
         WHERE id = $id");
     }
 }
