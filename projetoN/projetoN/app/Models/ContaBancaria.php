@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class conta_bancaria extends Model
+class ContaBancaria extends Model
 {
     use HasFactory;
 

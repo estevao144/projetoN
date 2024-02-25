@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\conta_bancaria as ContaBancaria;
+use App\Models\ContaBancaria as ContaBancaria;
 use App\Services\ApiService;
 use App\Models\LogHistoricoTransacao as Transacao;
 use App\Models\Usuarios;
