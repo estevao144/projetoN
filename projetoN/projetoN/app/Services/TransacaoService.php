@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\conta_bancaria as ContaBancaria;
 use App\Services\ApiService;
 use App\Models\log_historico_transacao as Transacao;
-
 use App\Models\Usuarios;
+use Carbon\Carbon;
 
 class TransacaoService
 {
@@ -113,6 +113,8 @@ class TransacaoService
                     'tipo_transacao' => 1,
                     'valor' => $valor,
                     'status' => 1,
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now()
                 ];
                 $transacao = Transacao::criarTransacao($dados);
                 if ($transacao) {

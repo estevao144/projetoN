@@ -29,15 +29,18 @@ class log_historico_transacao extends Model
     public static function criarTransacao($dados)
     {
         $query = DB::raw("
-        INSERT INTO log_historico_transacao (devedor_id, credor_id, tipo_transacao, valor, status)
-        VALUES (?,?,?,?,?)
+        INSERT INTO log_historico_transacao (devedor_id, credor_id, tipo_transacao, valor, status, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?)
         ");
         $valores = [
             $dados['devedor_id'],
             $dados['credor_id'],
             $dados['tipo_transacao'],
             $dados['valor'],
-            $dados['status']
+            $dados['status'],
+            $dados['created_at'],
+            $dados['updated_at'],
+
         ];
 
         return DB::insert($query, $valores);
