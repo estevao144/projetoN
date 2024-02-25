@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class log_historico_transacao extends Model
 {
@@ -47,15 +48,17 @@ class log_historico_transacao extends Model
     public static function listarLogsTransacoesUsuario($usuarioId)
     {
         return self::where('devedor_id', $usuarioId)
-        ->orWhere('credor_id', $usuarioId)->get();
+            ->orWhere('credor_id', $usuarioId)->get();
     }
     /**
      * Função criada para lista log especifico de transação.
      * @param string $id
      * @return object
      */
-    public static function listarLogTransacao($id)
+    public static function buscarTransacao($id)
     {
-        return self::find($id);
+        return DB::raw("SELECT *
+        FROM log_historico_transacoes
+        WHERE id = $id");
     }
 }
