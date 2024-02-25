@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class log_historico_transacao extends Model
+class LogHistoricoTransacao extends Model
 {
     use HasFactory;
 
@@ -72,8 +72,26 @@ class log_historico_transacao extends Model
      */
     public static function buscarTransacao($id)
     {
-        return DB::raw("SELECT *
+        $query = DB::raw("SELECT *
         FROM log_historico_transacao
         WHERE id = $id");
+
+        return DB::select($query)[0];
+    }
+
+    /**
+     * Função para atualizar status de uma transação revertida.
+     * @param string $id
+     * @return bool
+     */
+    public static function atualizarTransacao($id, $dados)
+    {
+        $query = DB::raw("UPDATE log_historico_transacao SET status = ?, updated_at = ? WHERE id = ?");
+        $valores = [
+            $dados['status'],
+            $dados['updated_at'],
+            $id
+        ];
+        return DB::update($query, $valores);
     }
 }

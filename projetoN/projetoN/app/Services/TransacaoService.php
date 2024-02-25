@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\conta_bancaria as ContaBancaria;
 use App\Services\ApiService;
-use App\Models\log_historico_transacao as Transacao;
+use App\Models\LogHistoricoTransacao as Transacao;
 use App\Models\Usuarios;
 use Carbon\Carbon;
 
@@ -31,7 +31,6 @@ class TransacaoService
 
         return $transacao;
     }
-
     /**
      * Função criada para validar se transação é válida.
      * @param int $idCredor
@@ -100,26 +99,24 @@ class TransacaoService
      */
     public function salvarTransacao($idCredor, $idDevedor, $valor)
     {
-        $respostaBanco = $this->apiService->notificarTransacao();
+        $respostaBanco = $this->apiService->autorizarTransacao();
         if ($respostaBanco) {
-            $respostaNotificacao = $this->apiService->notificarTransacao();
-            if ($respostaNotificacao) {
-                $this->retirarValorConta($idDevedor, $valor);
-                $this->adicionarValorConta($idCredor, $valor);
-                // salvar transação no banco
-                $dados = [
-                    'devedor_id' => $idDevedor,
-                    'credor_id' => $idCredor,
-                    'tipo_transacao' => 1,
-                    'valor' => $valor,
-                    'status' => 1,
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now()
-                ];
-                $transacao = Transacao::criarTransacao($dados);
-                if ($transacao) {
-                    return ['mensagem' => 'Transação realizada com sucesso.', 'status' => 200];
-                }
+            $this->retirarValorConta($idDevedor, $valor);
+            $this->adicionarValorConta($idCredor, $valor);
+            // salvar transação no banco
+            $dados = [
+                'devedor_id' => $idDevedor,
+                'credor_id' => $idCredor,
+                'tipo_transacao' => 1,
+                'valor' => $valor,
+                'status' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ];
+            $transacao = Transacao::criarTransacao($dados);
+            if ($transacao) {
+                $this->apiService->notificarTransacao();
+                return ['mensagem' => 'Transação realizada com sucesso.', 'status' => 200];
             }
         }
 
@@ -155,12 +152,69 @@ class TransacaoService
     /**
      * Método responsável por buscar uma transação.
      * @param int $idTransacao
-     * @return Transacao
+     * @return object
      */
     public function buscarTransacao($idTransacao)
     {
         $transacao = Transacao::buscarTransacao($idTransacao);
 
         return $transacao;
+    }
+
+    /**
+     * Método responsável por reverter uma transação.
+     * @param int $idTransacao
+     * @return array
+     */
+    public function reverterTransacao($idTransacao)
+    {
+        $transacao = $this->buscarTransacao($idTransacao);
+        switch ($transacao->status) {
+            case null:
+                throw new \Exception('Transação não encontrada.');
+            case 2:
+                throw new \Exception('Transação já foi revertida.');
+            case 3:
+                throw new \Exception('Transação já se encontra bloqueada.');
+            default:
+                return $this->reverterTransacaoBanco($transacao);
+        }
+    }
+    /**
+     * Função criada para reverter transação no banco.
+     * @param $transacao
+     * @return array
+     */
+    public function reverterTransacaoBanco($transacao)
+    {
+        $autorizacao = $this->validarReversao($transacao);
+        if ($autorizacao) {
+            $dados = [
+                'status' => 2,
+                'updated_at' => Carbon::now()
+            ];
+            // primeiro eu estorno o valor da conta do credor.
+            $this->retirarValorConta($transacao->credor_id, $transacao->valor);
+            // envio o valor para a conta do devedor.
+            $this->adicionarValorConta($transacao->devedor_id, $transacao->valor);
+            $transacao = Transacao::atualizarTransacao($transacao->id, $dados);
+            if ($transacao) {
+                $this->apiService->notificarTransacao();
+                return ['mensagem' => 'Transação revertida com sucesso.', 'status' => 200];
+            }
+        }
+        throw new \Exception('Houve um erro ao reverter a transação.');
+    }
+    /**
+     * Função criada para validar se transação pode ser revertida.
+     * @param Transacao $transacao
+     * @return bool
+     */
+    public function validarReversao($transacao)
+    {
+        if ($transacao->status != 1) {
+            throw new \Exception('Transação de reversão não pode ser revertida.');
+        }
+        return $this->apiService->autorizarTransacao();
     }
 }

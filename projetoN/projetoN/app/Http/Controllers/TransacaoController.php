@@ -29,4 +29,16 @@ class TransacaoController extends Controller
         $transacao = $this->transacaoService->criarTransacao($idCredor, $idDevedor, $valor);
         return response()->json($transacao);
     }
+
+    /**
+     * Enpoint criado para rever transação.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reverterTransacao(Request $request)
+    {
+        $idTransacao = $request->id;
+        $transacao = $this->transacaoService->reverterTransacao($idTransacao);
+        return response()->json($transacao);
+    }
 }
