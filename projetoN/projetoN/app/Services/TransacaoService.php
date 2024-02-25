@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\ContaBancaria as ContaBancaria;
 use App\Services\ApiService;
 use App\Models\LogHistoricoTransacao as Transacao;
-use App\Models\Usuarios;
+use App\Models\Usuario;
 use Carbon\Carbon;
 
 class TransacaoService
@@ -55,7 +55,7 @@ class TransacaoService
      */
     public function validarDevedor($idDevedor)
     {
-        $devedor = Usuarios::buscarUsuario($idDevedor);
+        $devedor = Usuario::buscarUsuario($idDevedor);
         if ($devedor == null) {
             throw new \Exception('Devedor não encontrado.');
         }
@@ -70,7 +70,7 @@ class TransacaoService
      */
     public function validarCredor($idCredor)
     {
-        $credor = Usuarios::buscarUsuario($idCredor);
+        $credor = Usuario::buscarUsuario($idCredor);
         if ($credor == null) {
             throw new \Exception('Credor não encontrado.');
         }
