@@ -22,7 +22,7 @@ class CreateUsuariosTable extends Migration
             $table->string('telefone')->unique();
             $table->foreignId('tipo_conta')->constrained('tipo_contas');
             $table->foreignId('status')->constrained('status');
-            $table->foreignId('conta')->constrained('conta_bancarias');
+            $table->foreignId('conta')->nullable()->constrained('conta_bancarias');
             
             $table->timestamps();
 

@@ -18,9 +18,11 @@ class CreateContaBancariasTable extends Migration
             $table->string('agencia')->default('0001');
             $table->string('conta')->unique();
             $table->integer('usuario')->unique();
-            $table->foreignId('status')->constrained('status');
             $table->bigInteger('saldo');
             $table->timestamps();
+
+            $table->index('usuario');
+            $table->index('conta');
         });
     }
 

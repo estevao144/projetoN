@@ -13,8 +13,8 @@ class CreateLogHistoricoTransacaosTable extends Migration
      */
     public function up()
     {
-        Schema::create('log_historico_transacaos', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('log_historico_transacao', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('devedor_id')->constrained('usuarios');
             $table->foreignId('credor_id')->constrained('usuarios');
             $table->string('tipo_transacao'); // deposito, saque, transferencia
@@ -34,6 +34,6 @@ class CreateLogHistoricoTransacaosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('log_historico_transacaos');
+        Schema::dropIfExists('log_historico_transacao');
     }
 }
