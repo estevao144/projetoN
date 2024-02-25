@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Usuarios extends Model
 {
@@ -28,6 +29,17 @@ class Usuarios extends Model
      */
     public function cadastrarUsuario($dados)
     {
-        return $this->create($dados);
+        return DB::table($this->table)->insert($dados);
+    }
+
+    /**
+     * Função criada para buscar um usuário.
+     * @param int $id
+     * @return object|null
+     */
+    public static function buscarUsuario($id)
+    {
+        $query = DB::select(DB::raw("SELECT * FROM usuarios WHERE id = $id"));
+        return isset($query[0]) ? $query[0] : null;
     }
 }

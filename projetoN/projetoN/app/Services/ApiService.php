@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Services\mockAPIExterna;
+namespace App\Services;
 
-use Illuminate\Support\Env;
 use Illuminate\Support\Facades\Http;
 
 class ApiService
@@ -30,7 +29,7 @@ class ApiService
     public function autorizarTransacao()
     {
         $response = $this->clientHttp->post($this->urlAutorizacao);
-        return $response->json();
+        return json_decode($response->body());
     }
 
     /**
@@ -39,6 +38,6 @@ class ApiService
     public function notificarTransacao()
     {
         $response = $this->clientHttp->post($this->urlNotificacao);
-        return $response->json();
+        return json_decode($response->body());
     }
 }
