@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\conta_bancaria as ContaBancaria;
 use App\Services\ApiService;
 use App\Models\log_historico_transacao as Transacao;
 
@@ -20,24 +21,14 @@ class TransacaoService
      * @param int $idCredor
      * @param int $idDevedor
      * @param float $valor
-     * @return int
+     * @return array
      */
     public function criarTransacao($idCredor, $idDevedor, $valor)
     {
         $this->validarTransacao($idCredor, $idDevedor, $valor);
 
-        $transacao = Transacao::criarTransacao($idCredor, $idDevedor, $valor);
+        $transacao = $this->salvarTransacao($idCredor, $idDevedor, $valor);
 
-        $respostaBanco = $this->apiService->notificarTransacao();
-        if ($respostaBanco) {
-            $respostaNotificacao = $this->apiService->notificarTransacao();
-            if ($respostaNotificacao) {
-                return $transacao;
-            }
-        } else {
-            $transacao->reverterTransacao($transacao->id);
-            throw new \Exception('Houve um erro ao realizar a transação.');
-        }
         return $transacao;
     }
 
@@ -94,13 +85,71 @@ class TransacaoService
      */
     public function validarValor($idCredor, $valor)
     {
-        $credor = Usuarios::buscarUsuario($idCredor);
-        if ($credor->saldo >= $valor) {
+        $valorDisponivel = ContaBancaria::buscarSaldo($idCredor);
+        if ($valorDisponivel >= $valor) {
             return;
         }
         throw new \Exception('Saldo insuficiente.');
     }
+    /**
+     * Função criada para retirar valor da conta do devedor e adicionar na conta do credor.
+     * @param int $idCredor
+     * @param int $idDevedor
+     * @param float $valor
+     * @return array
+     */
+    public function salvarTransacao($idCredor, $idDevedor, $valor)
+    {
+        $respostaBanco = $this->apiService->notificarTransacao();
+        if ($respostaBanco) {
+            $respostaNotificacao = $this->apiService->notificarTransacao();
+            if ($respostaNotificacao) {
+                $this->retirarValorConta($idDevedor, $valor);
+                $this->adicionarValorConta($idCredor, $valor);
+                // salvar transação no banco
+                $dados = [
+                    'devedor_id' => $idDevedor,
+                    'credor_id' => $idCredor,
+                    'tipo_transacao' => 1,
+                    'valor' => $valor,
+                    'status' => 1,
+                ];
+                $transacao = Transacao::criarTransacao($dados);
+                if ($transacao) {
+                    return ['mensagem' => 'Transação realizada com sucesso.', 'status' => 200];
+                }
+            }
+        }
 
+        throw new \Exception('Houve um erro ao realizar a transação.');
+    }
+    /**
+     * Função criada para adicionar valor na conta do credor.
+     * @param int $idCredor
+     * @param float $valor
+     * @return void
+     */
+    public function adicionarValorConta($idCredor, $valor)
+    {
+        $saldo = ContaBancaria::buscarSaldo($idCredor);
+        $valorAtual = $saldo + $valor;
+        ContaBancaria::depositarValor($idCredor, $valorAtual);
+    }
+    /**
+     * Função criada para retirar valor da conta do devedor.
+     * @param int $idDevedor
+     * @param float $valor
+     * @return void
+     */
+    public function retirarValorConta($idDevedor, $valor)
+    {
+        $saldo = ContaBancaria::buscarSaldo($idDevedor);
+        $valorAtual = $saldo - $valor;
+        if ($valorAtual < 0) {
+            throw new \Exception('Saldo insuficiente.');
+        }
+        ContaBancaria::retirarValor($idDevedor, $valorAtual);
+    }
     /**
      * Método responsável por buscar uma transação.
      * @param int $idTransacao
