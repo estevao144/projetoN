@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ContaBancaria extends Model
 {
@@ -21,12 +22,31 @@ class ContaBancaria extends Model
     ];
     /**
      * Função criada para cadastrar uma nova conta bancária vinculada ao usuario.
-     * @param array $dados
-     * @return bool
+     * @param $idUsuario
+     * @return int|null
      */
-    public function cadastrarContaBancaria($dados)
+    public static function cadastrarContaBancaria($idUsuario)
     {
-        return $this->create($dados);
+        $conta = rand(10000, 99999);
+        $query = DB::insert(
+            DB::raw("INSERT INTO conta_bancarias (agencia, conta, usuario, saldo, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?)"),
+            [
+                '0001', // Agência padrão '0001'
+                $conta,
+                $idUsuario,
+                0,
+                Carbon::now(),
+                Carbon::now(),
+            ]
+        );
+        
+        if($query){
+            return DB::getPdo()->lastInsertId();
+        }
+        return null;
+
+        
     }
 
     /**
@@ -47,7 +67,7 @@ class ContaBancaria extends Model
      */
     public static function retirarValor($usuario, $saldoAtual)
     {
-       DB::update(DB::raw("UPDATE conta_bancarias SET saldo = $saldoAtual WHERE usuario = $usuario"));
+        DB::update(DB::raw("UPDATE conta_bancarias SET saldo = $saldoAtual WHERE usuario = $usuario"));
     }
     /**
      * Função criada para buscar conta bancária de um usuário.
@@ -56,7 +76,7 @@ class ContaBancaria extends Model
      */
     public static function buscarContaBancaria($usuarioId)
     {
-        $query = DB::select(DB::raw("SELECT * FROM conta_bancarias WHERE usuario = $usuarioId"));
+        $query = DB::select(DB::raw("SELECT agencia, conta, saldo  FROM conta_bancarias WHERE usuario = $usuarioId"));
         return isset($query[0]) ? $query[0] : null;
     }
     /**
