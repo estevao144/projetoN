@@ -22,8 +22,8 @@ class TransacaoController extends Controller
      */
     public function criarTransacao(Request $request)
     {
-        $idCredor = $request->payer;
-        $idDevedor = $request->payee;
+        $idCredor = $request->payee;
+        $idDevedor = $request->payer;
         $valor = $request->value;
 
         $transacao = $this->transacaoService->criarTransacao($idCredor, $idDevedor, $valor);
