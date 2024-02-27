@@ -29,19 +29,36 @@ class UsuarioService
      */
     public function montarDadosUsuario($dados)
     {
-        $statusPadrao = 1;
         $dadosUsuario = [
             'nome' => $dados['nome'],
             'cpf' => $dados['cpf'],
             'email' => $dados['email'],
-            'senha' => $dados['senha'],
+            'senha' => $this->codificarSenha($dados['senha']),
             'telefone' => $dados['telefone'],
             'tipo_conta' => TipoConta::buscarIdConta($dados['tipo_conta']),
-            'status' => $statusPadrao,
             'conta' => null
         ];
         
         return $dadosUsuario;
+    }
+    /**
+     * Função criada para codificar a senha do usuário.
+     * @param string $senha
+     * @return string
+     */
+    public function codificarSenha($senha)
+    {
+        return base64_encode($senha);
+    }
+
+    /**
+     * Função criada para decodificar a senha do usuário.
+     * @param string $senha
+     * @return string
+     */
+    public function decodificarSenha($senha)
+    {
+        return base64_decode($senha);
     }
     /**
      * Função usada para buscar usuario pelo cpf.
@@ -75,7 +92,6 @@ class UsuarioService
             'telefone' => $usuario->telefone,
             'tipo_conta' => $tipoContas,
             'conta_bancaria' => $contaBancaria,
-            'status' => $usuario->status,
         ];
 
         return $dadosUsuario;

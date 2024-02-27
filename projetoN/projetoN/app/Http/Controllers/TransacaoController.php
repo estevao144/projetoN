@@ -25,9 +25,10 @@ class TransacaoController extends Controller
         $idCredor = $request->payee;
         $idDevedor = $request->payer;
         $valor = $request->value;
+        $password = $request->password;
 
-        $transacao = $this->transacaoService->criarTransacao($idCredor, $idDevedor, $valor);
-        return response()->json($transacao);
+        $transacao = $this->transacaoService->criarTransacao($idCredor, $idDevedor, $valor, $password);
+        return response()->json($transacao['mensagem'], $transacao['status']);
     }
 
     /**

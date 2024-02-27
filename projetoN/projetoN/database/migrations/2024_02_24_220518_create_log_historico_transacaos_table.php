@@ -17,9 +17,8 @@ class CreateLogHistoricoTransacaosTable extends Migration
             $table->id();
             $table->foreignId('devedor_id')->constrained('usuarios');
             $table->foreignId('credor_id')->constrained('usuarios');
-            $table->string('tipo_transacao'); // deposito, saque, transferencia
+            $table->foreignId('status')->constrained('status_transacao');
             $table->decimal('valor', 10, 2);
-            $table->string('status');
             $table->timestamps();
 
             $table->index('devedor_id');

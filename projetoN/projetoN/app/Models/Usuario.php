@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Usuario extends Model
 {
@@ -19,7 +20,7 @@ class Usuario extends Model
         'senha',
         'telefone',
         'tipo_conta',
-        'status',
+        'conta',
     ];
 
     /**
@@ -30,8 +31,8 @@ class Usuario extends Model
     public static function cadastrarUsuario($dados)
     {
         $query = DB::insert(
-            DB::raw("INSERT INTO usuarios (nome, cpf, email, senha, telefone, tipo_conta, status, conta) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)"),
+            DB::raw("INSERT INTO usuarios (nome, cpf, email, senha, telefone, tipo_conta, conta, created_at, updated_at) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"),
             [
                 $dados['nome'],
                 $dados['cpf'],
@@ -39,8 +40,9 @@ class Usuario extends Model
                 $dados['senha'],
                 $dados['telefone'],
                 $dados['tipo_conta'],
-                $dados['status'],
-                $dados['conta']
+                $dados['conta'],
+                Carbon::now(),
+                Carbon::now()
             ]
         );
         if ($query) {
@@ -89,7 +91,6 @@ class Usuario extends Model
     public static function buscarUsuarioPorEmail($email)
     {
         $usuario = DB::select(DB::raw("SELECT * FROM usuarios WHERE email = '$email'"));
-        
         return $usuario;
     }
     /**

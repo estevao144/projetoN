@@ -44,11 +44,26 @@ class ContaBancaria extends Model
         if($query){
             return DB::getPdo()->lastInsertId();
         }
-        return null;
-
-        
+        return null;   
     }
-
+    /**
+     * Função criada para salvar controle de tentativas de transações.
+     * @param int $idUsuario
+     * @param int $tentativas
+     * @return void
+     */
+    public static function atualizarTentativas($idUsuario, $tentativas)
+    {
+        DB::update(DB::raw("UPDATE conta_bancarias SET tentativas = $tentativas WHERE usuario = $idUsuario"));
+    }
+    /**
+     * FUnção criada para bloquear conta do usuario devedor.
+     * @param int $idDevedor
+     */
+    public static function bloquearConta($idDevedor)
+    {
+        DB::update(DB::raw("UPDATE conta_bancarias SET status = 'bloqueado' WHERE usuario = $idDevedor"));
+    }
     /**
      * Função criada para retirar um valor da conta bancária e adicionar na conta do credor.
      * @param int $usuario
@@ -76,7 +91,7 @@ class ContaBancaria extends Model
      */
     public static function buscarContaBancaria($usuarioId)
     {
-        $query = DB::select(DB::raw("SELECT agencia, conta, saldo  FROM conta_bancarias WHERE usuario = $usuarioId"));
+        $query = DB::select(DB::raw("SELECT agencia, conta,status, tentativas, saldo  FROM conta_bancarias WHERE usuario = $usuarioId"));
         return isset($query[0]) ? $query[0] : null;
     }
     /**
@@ -86,7 +101,7 @@ class ContaBancaria extends Model
      */
     public static function buscarSaldo($id)
     {
-        $query = DB::select(DB::raw("SELECT saldo FROM conta_bancarias WHERE id = $id"));
+        $query = DB::select(DB::raw("SELECT saldo FROM conta_bancarias WHERE usuario = $id"));
         return isset($query[0]) ? $query[0]->saldo : null;
     }
 }

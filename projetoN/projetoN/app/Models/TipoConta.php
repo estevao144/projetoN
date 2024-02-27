@@ -14,7 +14,6 @@ class TipoConta extends Model
     protected $fillable = [
         'tipo_conta',
         'taxa',
-        'status',
         'descricao'
     ];
 
@@ -35,9 +34,9 @@ class TipoConta extends Model
      */
     public static function buscarNomeConta($conta)
     {
-        $query = DB::select(DB::raw("SELECT descricao FROM tipo_contas WHERE id = $conta"));
+        $query = DB::select(DB::raw("SELECT tipo_conta FROM tipo_contas WHERE id = $conta"));
         
-        return isset($query[0]) ? $query[0]->descricao : null;
+        return isset($query[0]) ? $query[0]->tipo_conta : null;
     }
 
     /**

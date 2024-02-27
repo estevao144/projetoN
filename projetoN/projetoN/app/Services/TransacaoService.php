@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\ContaBancaria as ContaBancaria;
 use App\Services\ApiService;
+use App\Services\UsuarioService;
+use App\Models\ContaBancaria as ContaBancaria;
 use App\Models\LogHistoricoTransacao as Transacao;
 use App\Models\Usuario;
 use Carbon\Carbon;
@@ -11,10 +12,12 @@ use Carbon\Carbon;
 class TransacaoService
 {
     protected $apiService;
+    protected $usuarioService;
 
-    public function __construct(ApiService $apiService)
+    public function __construct(ApiService $apiService, UsuarioService $usuarioService)
     {
         $this->apiService = $apiService;
+        $this->usuarioService = $usuarioService;
     }
     /**
      * Método responsável por criar uma transação.
@@ -23,9 +26,9 @@ class TransacaoService
      * @param float $valor
      * @return array
      */
-    public function criarTransacao($idCredor, $idDevedor, $valor)
+    public function criarTransacao($idCredor, $idDevedor, $valor, $password)
     {
-        $this->validarTransacao($idCredor, $idDevedor, $valor);
+        $this->validarTransacao($idCredor, $idDevedor, $valor, $password);
 
         $transacao = $this->salvarTransacao($idCredor, $idDevedor, $valor);
 
@@ -36,12 +39,13 @@ class TransacaoService
      * @param int $idCredor
      * @param int $idDevedor
      * @param float $valor
+     * @param string $password
      * @return void
      */
-    public function validarTransacao($idCredor, $idDevedor, $valor)
+    public function validarTransacao($idCredor, $idDevedor, $valor, $password)
     {
         // primeiro valido se o devedor é uma loja
-        $this->validarDevedor($idDevedor);
+        $this->validarDevedor($idDevedor, $password);
         // valido se o credor é uma pessoa
         $this->validarCredor($idCredor);
         // valido se o valor é maior que 0
@@ -53,14 +57,34 @@ class TransacaoService
      * @param int $idDevedor
      * @return void
      */
-    public function validarDevedor($idDevedor)
+    public function validarDevedor($idDevedor, $password)
     {
         $devedor = Usuario::buscarUsuario($idDevedor);
         if ($devedor == null) {
-            throw new \Exception('Devedor não encontrado.');
+            throw new \Exception('Usuario não encontrado.');
         }
         if ($devedor->tipo_conta != 1) {
-            throw new \Exception('Devedor não é uma loja.');
+            throw new \Exception('Operação negada para tipo de conta.');
+        }
+        $conta = ContaBancaria::buscarContaBancaria($idDevedor);
+        if ($conta->status != 'ativo') {
+            throw new \Exception('Conta bloqueada, contate o suporte.');
+        }
+        if(session('tentativas') == 0 || session('tentativas') == null){
+            session(['tentativas' => 0]);
+        }
+
+        $senhaUsuario = $this->usuarioService->decodificarSenha($devedor->senha);
+        if ($senhaUsuario != $password) {
+            $tentativas = $conta->tentativas + 1;
+            ContaBancaria::atualizarTentativas($idDevedor, $tentativas);
+            if ($tentativas > 2) {
+                ContaBancaria::bloquearConta($idDevedor);
+                throw new \Exception('Conta bloqueada, contate o suporte.');
+            }
+            throw new \Exception('Senha inválida. Você tem mais ' . (3 - $tentativas) . ' tentativas.');
+        } else {
+            session(['tentativas' => 0]);
         }
     }
     /**
@@ -107,9 +131,8 @@ class TransacaoService
             $dados = [
                 'devedor_id' => $idDevedor,
                 'credor_id' => $idCredor,
-                'tipo_transacao' => 1,
                 'valor' => $valor,
-                'status' => 1,
+                'status' => 1, // 1 = transação realizada
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now()
             ];
@@ -117,6 +140,19 @@ class TransacaoService
             if ($transacao) {
                 $this->apiService->notificarTransacao();
                 return ['mensagem' => 'Transação realizada com sucesso.', 'status' => 200];
+            }
+        } else {
+            $dados = [
+                'devedor_id' => $idDevedor,
+                'credor_id' => $idCredor,
+                'valor' => $valor,
+                'status' => 3, // 3 = transação recusada
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now()
+            ];
+            $transacao = Transacao::criarTransacao($dados);
+            if ($transacao) {
+                return ['mensagem' => 'Transação recusada.', 'status' => 400];
             }
         }
 
