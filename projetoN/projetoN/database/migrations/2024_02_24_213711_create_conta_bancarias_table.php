@@ -20,9 +20,11 @@ class CreateContaBancariasTable extends Migration
             $table->string('status')->default('ativo');
             $table->integer('tentativas')->default(0);
             $table->integer('usuario')->unique();
-            $table->foreignId('status')->constrained('status');
             $table->bigInteger('saldo');
             $table->timestamps();
+
+            $table->index('usuario');
+            $table->index('conta');
         });
     }
 

@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class Usuarios extends Seeder
+class UsuariosSeed extends Seeder
 {
     /**
      * Run the database seeds.
@@ -21,8 +21,8 @@ class Usuarios extends Seeder
             'senha' => '123456',
             'telefone' => '123456789',
             'tipo_conta' => 1,
-            'status' => 'ativo',
-            'conta' => '123456-7',
+            'status' => 1,
+            'conta' => 1,
         ]);
 
         DB::table('usuarios')->insert([
@@ -32,8 +32,8 @@ class Usuarios extends Seeder
             'senha' => '654321',
             'telefone' => '987654321',
             'tipo_conta' => 1,
-            'status' => 'ativo',
-            'conta' => '765432-1',
+            'status' => 1,
+            'conta' => 2,
         ]);
 
         DB::table('usuarios')->insert([
@@ -43,8 +43,8 @@ class Usuarios extends Seeder
             'senha' => '123456',
             'telefone' => '987456321',
             'tipo_conta' => 2,
-            'status' => 'ativo',
-            'conta' => '987654-3',
+            'status' => 1,
+            'conta' => 3,
         ]);
     }
 }
