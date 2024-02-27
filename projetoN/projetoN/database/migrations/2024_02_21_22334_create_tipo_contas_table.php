@@ -1,5 +1,6 @@
 <?php
 
+use Database\Seeders\TipoContaSeed;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,15 +18,14 @@ class CreateTipoContasTable extends Migration
             $table->id();
             $table->string('tipo_conta'); // corrente, lojista
             $table->decimal('taxa', 10, 2); // taxa de operacao
-            $table->string('status'); // ativo, inativo, bloqueado
             $table->string('descricao'); // descricao do tipo de conta
             $table->timestamps();
 
             $table->index('tipo_conta');
             
-            $TipoTransacaoSeed = new TipoTransacaoSeed();
-            $TipoTransacaoSeed->run();
         });
+        $TipoTransacaoSeed = new TipoContaSeed();
+        $TipoTransacaoSeed->run();
     }
 
     /**

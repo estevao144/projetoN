@@ -15,16 +15,14 @@ class tipoContaSeed extends Seeder
     public function run()
     {
         DB::table('tipo_contas')->insert([
-            'tipo_conta' => 'corrente',
+            'tipo_conta' => 'usuario',
             'taxa' => 0.00,
-            'status' => 'ativo',
-            'descricao' => 'Conta corrente'
+            'descricao' => 'Conta de usuario fisico'
         ]);
 
         DB::table('tipo_contas')->insert([
             'tipo_conta' => 'lojista',
             'taxa' => 0.05,
-            'status' => 'ativo',
             'descricao' => 'Conta lojista'
         ]);
     }

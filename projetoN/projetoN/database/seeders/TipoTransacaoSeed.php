@@ -15,17 +15,17 @@ class TipoTransacaoSeed extends Seeder
      */
     public function run()
     {
-        DB::table('tipo_transacaos')->insert([
+        DB::table('tipo_transacao')->insert([
             'tipo_transacao' => 'deposito',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
-        DB::table('tipo_transacaos')->insert([
+        DB::table('tipo_transacao')->insert([
             'tipo_transacao' => 'saque',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()
         ]);
-        DB::table('tipo_transacaos')->insert([
+        DB::table('tipo_transacao')->insert([
             'tipo_transacao' => 'transferencia',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now()

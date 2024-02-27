@@ -17,6 +17,8 @@ class CreateContaBancariasTable extends Migration
             $table->id();
             $table->string('agencia')->default('0001');
             $table->string('conta')->unique();
+            $table->string('status')->default('ativo');
+            $table->integer('tentativas')->default(0);
             $table->integer('usuario')->unique();
             $table->foreignId('status')->constrained('status');
             $table->bigInteger('saldo');
